@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Szalona Tabliczka Mnożenia 🚀</title>
+    <!-- Tailwind CSS for utility styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts for fun, kid-friendly typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        fredoka: ['Fredoka', 'sans-serif'],
+                        quicksand: ['Quicksand', 'sans-serif'],
+                    },
+                    colors: {
+                        brandYellow: '#FFD166',
+                        brandPink: '#EF476F',
+                        brandGreen: '#06D6A0',
+                        brandBlue: '#118AB2',
+                        brandPurple: '#8338EC',
+                        brandDark: '#073B4C'
+                    },
+                    boxShadow: {
+                        'fun': '0 8px 0px 0px rgba(0, 0, 0, 0.15)',
+                        'fun-lg': '0 12px 0px 0px rgba(0, 0, 0, 0.15)',
+                        'fun-active': '0 2px 0px 0px rgba(0, 0, 0, 0.15)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background: linear-gradient(135deg, #a8ff78 0%, #78ffd6 100%);
+            min-height: 100vh;
+            user-select: none;
+        }
+
+        .bounce-in {
+            animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); opacity: 1; }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+
+        .shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+
+        .pulse-star {
+            animation: pulseStar 1.5s infinite alternate;
+        }
+
+        @keyframes pulseStar {
+            0% { transform: scale(1) rotate(0deg); }
+            100% { transform: scale(1.2) rotate(15deg); }
+        }
+
+        /* Fun floating background blobs */
+        .bg-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.4;
+            z-index: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center p-3 md:p-6 min-h-screen relative overflow-x-hidden">
+
+    <div class="bg-blob w-72 h-72 bg-yellow-300 top-5 left-5"></div>
+    <div class="bg-blob w-96 h-96 bg-purple-400 bottom-5 right-5"></div>
+    <div class="bg-blob w-80 h-80 bg-pink-400 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+
+    <div class="w-full max-w-xl z-10">
+
+        <!-- Header Banner -->
+        <header class="text-center mb-4">
+            <h1 class="text-3xl md:text-5xl font-extrabold text-brandDark drop-shadow-md tracking-wide flex items-center justify-center gap-3">
+                <span>⭐</span> Szalony Quiz Mnożenia 🚀
+            </h1>
+            <p class="text-brandDark font-semibold text-base md:text-lg mt-1 opacity-90">
+                Zostań Mistrzem Mnożenia! 🧠✨
+            </p>
+        </header>
+
+        <!-- ================= PAGE 1: MENU / SETUP ================= -->
+        <div id="setup-screen" class="bg-white rounded-3xl p-6 md:p-8 shadow-fun-lg border-4 border-brandDark space-y-6 bounce-in">
+            
+            <!-- Preset Difficulty Selection -->
+            <div>
+                <label class="block text-xl font-bold text-brandDark mb-3 text-center">
+                    <i class="fa-solid fa-gauge-high text-brandPink mr-2"></i>Wybierz Poziom Trudności:
+                </label>
+                <div class="grid grid-cols-2 gap-3">
+                    <button type="button" onclick="setPreset(1, 1, 'latwy')" id="preset-latwy"
+                        class="preset-btn p-3 rounded-2xl border-4 border-brandDark bg-emerald-100 hover:bg-emerald-200 font-bold text-base md:text-lg text-emerald-900 shadow-fun transition-all active:translate-y-1">
+                        🌱 Łatwy<br><span class="text-xs md:text-sm font-normal text-emerald-700">(1 cyfra × 1 cyfra)</span>
+                    </button>
+                    <button type="button" onclick="setPreset(2, 1, 'sredni')" id="preset-sredni"
+                        class="preset-btn p-3 rounded-2xl border-4 border-brandDark bg-yellow-100 hover:bg-yellow-200 font-bold text-base md:text-lg text-yellow-900 shadow-fun transition-all active:translate-y-1">
+                        ⚡ Średni<br><span class="text-xs md:text-sm font-normal text-yellow-700">(2 cyfry × 1 cyfra)</span>
+                    </button>
+                    <button type="button" onclick="setPreset(2, 2, 'trudny')" id="preset-trudny"
+                        class="preset-btn p-3 rounded-2xl border-4 border-brandDark bg-orange-100 hover:bg-orange-200 font-bold text-base md:text-lg text-orange-900 shadow-fun transition-all active:translate-y-1">
+                        🔥 Trudny<br><span class="text-xs md:text-sm font-normal text-orange-700">(2 cyfry × 2 cyfry)</span>
+                    </button>
+                    <button type="button" onclick="setPreset(3, 1, 'mistrz')" id="preset-mistrz"
+                        class="preset-btn p-3 rounded-2xl border-4 border-brandDark bg-purple-100 hover:bg-purple-200 font-bold text-base md:text-lg text-purple-900 shadow-fun transition-all active:translate-y-1">
+                        👑 Mistrz<br><span class="text-xs md:text-sm font-normal text-purple-700">(3 cyfry × 1 cyfra)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Custom Digit Selectors -->
+            <div class="bg-blue-50 p-4 rounded-2xl border-2 border-brandBlue/30">
+                <p class="text-sm font-bold text-brandBlue mb-2 text-center uppercase tracking-wider">
+                    <i class="fa-solid fa-sliders mr-1"></i> Lub ustaw własne cyfry:
+                </p>
+                <div class="flex justify-around items-center gap-4 text-center">
+                    <div>
+                        <span class="block text-xs font-bold text-gray-600 mb-1">Pierwsza liczba:</span>
+                        <div class="flex items-center justify-center gap-1">
+                            <button onclick="changeDigits('digits1', -1)" class="w-9 h-9 rounded-xl bg-brandBlue text-white font-bold text-xl shadow-md active:scale-95">-</button>
+                            <span id="digits1-val" class="w-10 text-xl font-black text-brandDark">1</span>
+                            <button onclick="changeDigits('digits1', 1)" class="w-9 h-9 rounded-xl bg-brandBlue text-white font-bold text-xl shadow-md active:scale-95">+</button>
+                        </div>
+                        <span class="text-xs text-gray-500 font-medium">cyfr(y)</span>
+                    </div>
+                    <div class="text-2xl font-black text-brandPink">×</div>
+                    <div>
+                        <span class="block text-xs font-bold text-gray-600 mb-1">Druga liczba:</span>
+                        <div class="flex items-center justify-center gap-1">
+                            <button onclick="changeDigits('digits2', -1)" class="w-9 h-9 rounded-xl bg-brandBlue text-white font-bold text-xl shadow-md active:scale-95">-</button>
+                            <span id="digits2-val" class="w-10 text-xl font-black text-brandDark">1</span>
+                            <button onclick="changeDigits('digits2', 1)" class="w-9 h-9 rounded-xl bg-brandBlue text-white font-bold text-xl shadow-md active:scale-95">+</button>
+                        </div>
+                        <span class="text-xs text-gray-500 font-medium">cyfr(y)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Mode Selection -->
+            <div>
+                <label class="block text-lg font-bold text-brandDark mb-2 text-center">
+                    <i class="fa-solid fa-gamepad text-brandPurple mr-2"></i>Tryb Gry:
+                </label>
+                <div class="grid grid-cols-3 gap-2">
+                    <button type="button" onclick="setGameMode('10q')" id="mode-10q"
+                        class="mode-btn p-3 rounded-2xl border-4 border-brandDark bg-pink-100 text-brandDark font-bold text-center text-sm md:text-base shadow-fun transition-all">
+                        🎯 10 Pytań
+                    </button>
+                    <button type="button" onclick="setGameMode('time')" id="mode-time"
+                        class="mode-btn p-3 rounded-2xl border-4 border-brandDark bg-gray-100 text-brandDark font-bold text-center text-sm md:text-base shadow-fun transition-all">
+                        ⏱️ Na Czas (60s)
+                    </button>
+                    <button type="button" onclick="setGameMode('endless')" id="mode-endless"
+                        class="mode-btn p-3 rounded-2xl border-4 border-brandDark bg-gray-100 text-brandDark font-bold text-center text-sm md:text-base shadow-fun transition-all">
+                        ♾️ Bez Końca
+                    </button>
+                </div>
+            </div>
+
+            <!-- High Scores Bar -->
+            <div class="flex justify-between items-center text-xs md:text-sm font-bold bg-amber-50 p-3 rounded-xl border border-amber-200 text-amber-900">
+                <span>🏆 Najlepszy wynik: <span id="best-score-display" class="text-base font-black text-brandPink">0</span> pkt</span>
+                <span>🔥 Rekord serii: <span id="best-streak-display" class="text-base font-black text-orange-500">0</span></span>
+            </div>
+
+            <!-- Start Game Button -->
+            <button onclick="startGame()" 
+                class="w-full py-4 bg-brandGreen hover:bg-emerald-400 text-brandDark font-black text-2xl rounded-2xl border-4 border-brandDark shadow-fun active:shadow-fun-active active:translate-y-2 transition-all flex items-center justify-center gap-3">
+                <i class="fa-solid fa-play"></i> ZACZYNAJMY!
+            </button>
+
+        </div>
+
+        <!-- ================= PAGE 2: QUIZ INTERFACE ================= -->
+        <div id="quiz-screen" class="bg-white rounded-3xl p-5 md:p-7 shadow-fun-lg border-4 border-brandDark space-y-4 hidden relative">
+            
+            <!-- Top Bar: Scores & Stats -->
+            <div class="flex justify-between items-center text-sm md:text-base font-extrabold bg-blue-50 p-3 rounded-2xl border-2 border-brandBlue/20">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">⭐</span>
+                    <div>
+                        <span class="text-xs text-gray-500 block -mb-1">Punkty</span>
+                        <span id="score-val" class="text-brandBlue text-xl font-black">0</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <span class="text-xl pulse-star">🔥</span>
+                    <div>
+                        <span class="text-xs text-gray-500 block -mb-1">Seria</span>
+                        <span id="streak-val" class="text-orange-500 text-xl font-black">0</span>
+                    </div>
+                </div>
+
+                <div id="tracker-container" class="text-right">
+                    <span id="tracker-label" class="text-xs text-gray-500 block -mb-1">Pytanie</span>
+                    <span id="tracker-val" class="text-brandPurple text-xl font-black">1/10</span>
+                </div>
+            </div>
+
+            <!-- Math Question Display -->
+            <div id="question-box" class="bg-amber-100 rounded-2xl p-6 text-center border-4 border-brandDark shadow-inner relative overflow-hidden">
+                <div class="text-4xl md:text-6xl font-black text-brandDark tracking-wider flex items-center justify-center gap-3 my-2">
+                    <span id="factor1">7</span>
+                    <span class="text-brandPink">×</span>
+                    <span id="factor2">8</span>
+                    <span class="text-brandBlue">=</span>
+                    <span id="user-answer-display" class="min-w-[2ch] bg-white px-3 py-1 rounded-xl border-4 border-dashed border-brandDark text-brandPurple inline-block min-h-[1.3em]">
+                        ?
+                    </span>
+                </div>
+                <!-- Dynamic feedback banner -->
+                <div id="feedback-message" class="h-6 text-base font-bold text-brandPink mt-1 opacity-0 transition-opacity">
+                    Świetnie!
+                </div>
+            </div>
+
+            <!-- Virtual On-Screen Keypad -->
+            <div class="grid grid-cols-3 gap-2 md:gap-3 max-w-xs mx-auto">
+                <button onclick="pressKey('1')" class="keypad-btn">1</button>
+                <button onclick="pressKey('2')" class="keypad-btn">2</button>
+                <button onclick="pressKey('3')" class="keypad-btn">3</button>
+                <button onclick="pressKey('4')" class="keypad-btn">4</button>
+                <button onclick="pressKey('5')" class="keypad-btn">5</button>
+                <button onclick="pressKey('6')" class="keypad-btn">6</button>
+                <button onclick="pressKey('7')" class="keypad-btn">7</button>
+                <button onclick="pressKey('8')" class="keypad-btn">8</button>
+                <button onclick="pressKey('9')" class="keypad-btn">9</button>
+                <button onclick="clearAnswer()" class="keypad-btn bg-red-100 text-red-600 hover:bg-red-200">
+                    <i class="fa-solid fa-backspace"></i>
+                </button>
+                <button onclick="pressKey('0')" class="keypad-btn">0</button>
+                <button onclick="submitAnswer()" class="keypad-btn bg-brandGreen text-brandDark hover:bg-emerald-400">
+                    <i class="fa-solid fa-check text-2xl"></i>
+                </button>
+            </div>
+
+            <!-- Quiz Controls -->
+            <div class="flex justify-between items-center pt-2">
+                <button onclick="quitGame()" class="text-xs md:text-sm font-bold text-gray-500 hover:text-red-500 transition-colors">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Wyjdź do menu
+                </button>
+                <span class="text-xs text-gray-400 font-medium">Użyj klawiatury lub przycisków</span>
+            </div>
+
+        </div>
+
+        <!-- ================= PAGE 3: RESULTS SUMMARY ================= -->
+        <div id="summary-screen" class="bg-white rounded-3xl p-6 md:p-8 shadow-fun-lg border-4 border-brandDark text-center space-y-6 hidden bounce-in">
+            <div class="text-6xl my-2" id="trophy-emoji">🏆</div>
+            <h2 id="summary-title" class="text-3xl md:text-4xl font-extrabold text-brandDark">
+                Niesamowicie!
+            </h2>
+            <p id="summary-subtitle" class="text-gray-600 font-semibold">
+                Oto Twój wspaniały wynik!
+            </p>
+
+            <div class="grid grid-cols-2 gap-4 bg-purple-50 p-4 rounded-2xl border-2 border-brandPurple/30">
+                <div class="p-3 bg-white rounded-xl shadow-sm border border-purple-100">
+                    <span class="block text-xs font-bold text-gray-500 uppercase">Wynik Ogólny</span>
+                    <span id="final-score" class="text-3xl font-black text-brandBlue">0</span>
+                    <span class="text-xs text-gray-400">pkt</span>
+                </div>
+                <div class="p-3 bg-white rounded-xl shadow-sm border border-purple-100">
+                    <span class="block text-xs font-bold text-gray-500 uppercase">Celność</span>
+                    <span id="final-accuracy" class="text-3xl font-black text-brandGreen">100%</span>
+                </div>
+                <div class="p-3 bg-white rounded-xl shadow-sm border border-purple-100">
+                    <span class="block text-xs font-bold text-gray-500 uppercase">Najdłuższa Seria</span>
+                    <span id="final-streak" class="text-3xl font-black text-orange-500">0</span>
+                    <span class="text-xs text-gray-400">z rzędu</span>
+                </div>
+                <div class="p-3 bg-white rounded-xl shadow-sm border border-purple-100">
+                    <span class="block text-xs font-bold text-gray-500 uppercase">Czas Gry</span>
+                    <span id="final-time" class="text-3xl font-black text-brandPink">0s</span>
+                </div>
+            </div>
+
+            <button onclick="showSetupScreen()" 
+                class="w-full py-4 bg-brandYellow hover:bg-yellow-300 text-brandDark font-black text-xl rounded-2xl border-4 border-brandDark shadow-fun active:shadow-fun-active active:translate-y-2 transition-all">
+                <i class="fa-solid fa-rotate-right mr-2"></i> ZAGRAJ JESZCZE RAZ
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Custom CSS styling for Keypad buttons -->
+    <style>
+        .keypad-btn {
+            background-color: #f8fafc;
+            color: #073B4C;
+            font-size: 1.75rem;
+            font-weight: 800;
+            padding: 0.75rem 0;
+            border-radius: 1rem;
+            border: 3px solid #073B4C;
+            box-shadow: 0 4px 0px 0px rgba(7, 59, 76, 1);
+            transition: all 0.05s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .keypad-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0px 0px 0px rgba(7, 59, 76, 1);
+        }
+    </style>
+
+    <script>
+        // Web Audio API Synthesizer for lag-free, custom sound effects
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Sound effect generator functions
+        function playSound(type) {
+            try {
+                initAudio();
+                if (!audioCtx) return;
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                } else if (type === 'correct') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now); // A3
+                    osc.frequency.setValueAtTime(180, now + 0.1);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'fanfare') {
+                    const notes = [523.25, 659.25, 783.99, 1046.50];
+                    notes.forEach((freq, idx) => {
+                        const noteOsc = audioCtx.createOscillator();
+                        const noteGain = audioCtx.createGain();
+                        noteOsc.connect(noteGain);
+                        noteGain.connect(audioCtx.destination);
+                        
+                        noteOsc.type = 'triangle';
+                        noteOsc.frequency.setValueAtTime(freq, now + idx * 0.1);
+                        noteGain.gain.setValueAtTime(0.2, now + idx * 0.1);
+                        noteGain.gain.linearRampToValueAtTime(0.01, now + idx * 0.1 + 0.25);
+                        
+                        noteOsc.start(now + idx * 0.1);
+                        noteOsc.stop(now + idx * 0.1 + 0.25);
+                    });
+                }
+            } catch (e) {
+                console.log('Audio playback prevented or unsupported');
+            }
+        }
+
+        // ================= GAME LOGIC & STATE =================
+        let digits1 = 1;
+        let digits2 = 1;
+        let gameMode = '10q'; // '10q', 'time', 'endless'
+        
+        let score = 0;
+        let streak = 0;
+        let maxStreak = 0;
+        let totalQuestions = 0;
+        let correctAnswers = 0;
+        let currentQuestionIndex = 0;
+        
+        let factor1 = 0;
+        let factor2 = 0;
+        let correctAnswer = 0;
+        let currentInput = "";
+        
+        let timeRemaining = 60;
+        let timerInterval = null;
+        let startTime = 0;
+        let totalTimeSpent = 0;
+
+        // Feedback praise words
+        const praisePhrases = ["Świetnie! 🌟", "Super! 🚀", "Brawo! 🎉", "Genialnie! 🧠", "Mistrz! 👑", "Ekstra! ⚡"];
+
+        // Initialize High Scores from LocalStorage
+        window.onload = function() {
+            updateHighScoreDisplay();
+            setPreset(1, 1, 'latwy');
+            setGameMode('10q');
+        };
+
+        function changeDigits(target, delta) {
+            playSound('click');
+            if (target === 'digits1') {
+                digits1 = Math.max(1, Math.min(3, digits1 + delta));
+                document.getElementById('digits1-val').innerText = digits1;
+            } else {
+                digits2 = Math.max(1, Math.min(3, digits2 + delta));
+                document.getElementById('digits2-val').innerText = digits2;
+            }
+            // Clear preset highlight when custom changed
+            document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('ring-4', 'ring-brandPink'));
+        }
+
+        function setPreset(d1, d2, presetName) {
+            playSound('click');
+            digits1 = d1;
+            digits2 = d2;
+            document.getElementById('digits1-val').innerText = digits1;
+            document.getElementById('digits2-val').innerText = digits2;
+
+            document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('ring-4', 'ring-brandPink'));
+            const selected = document.getElementById(`preset-${presetName}`);
+            if (selected) selected.classList.add('ring-4', 'ring-brandPink');
+        }
+
+        function setGameMode(mode) {
+            playSound('click');
+            gameMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(b => {
+                b.classList.remove('bg-pink-200', 'border-brandPink', 'text-brandPink');
+                b.classList.add('bg-gray-100');
+            });
+            const selected = document.getElementById(`mode-${mode}`);
+            if (selected) {
+                selected.classList.remove('bg-gray-100');
+                selected.classList.add('bg-pink-200', 'border-brandPink');
+            }
+        }
+
+        function startGame() {
+            playSound('click');
+            score = 0;
+            streak = 0;
+            maxStreak = 0;
+            totalQuestions = 0;
+            correctAnswers = 0;
+            currentQuestionIndex = 0;
+            currentInput = "";
+            startTime = Date.now();
+
+            document.getElementById('score-val').innerText = "0";
+            document.getElementById('streak-val').innerText = "0";
+            document.getElementById('user-answer-display').innerText = "?";
+
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('summary-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+
+            if (gameMode === 'time') {
+                timeRemaining = 60;
+                document.getElementById('tracker-label').innerText = "Czas";
+                document.getElementById('tracker-val').innerText = "60s";
+                timerInterval = setInterval(updateTimer, 1000);
+            } else if (gameMode === '10q') {
+                document.getElementById('tracker-label').innerText = "Pytanie";
+                document.getElementById('tracker-val').innerText = "1/10";
+            } else {
+                document.getElementById('tracker-label').innerText = "Tryb";
+                document.getElementById('tracker-val').innerText = "♾️";
+            }
+
+            nextQuestion();
+        }
+
+        function updateTimer() {
+            timeRemaining--;
+            document.getElementById('tracker-val').innerText = timeRemaining + "s";
+            if (timeRemaining <= 0) {
+                clearInterval(timerInterval);
+                finishGame();
+            }
+        }
+
+        function generateNumber(digits) {
+            if (digits === 1) {
+                return Math.floor(Math.random() * 9) + 1; // 1 to 9
+            } else if (digits === 2) {
+                return Math.floor(Math.random() * 90) + 10; // 10 to 99
+            } else if (digits === 3) {
+                return Math.floor(Math.random() * 900) + 100; // 100 to 999
+            }
+            return 1;
+        }
+
+        function nextQuestion() {
+            currentInput = "";
+            document.getElementById('user-answer-display').innerText = "?";
+            document.getElementById('user-answer-display').classList.remove('text-emerald-600', 'text-red-500');
+            document.getElementById('user-answer-display').classList.add('text-brandPurple');
+
+            factor1 = generateNumber(digits1);
+            factor2 = generateNumber(digits2);
+            correctAnswer = factor1 * factor2;
+
+            document.getElementById('factor1').innerText = factor1;
+            document.getElementById('factor2').innerText = factor2;
+
+            if (gameMode === '10q') {
+                currentQuestionIndex++;
+                document.getElementById('tracker-val').innerText = `${currentQuestionIndex}/10`;
+            }
+        }
+
+        // On-screen Keypad handling
+        function pressKey(num) {
+            playSound('click');
+            if (currentInput.length < 7) {
+                currentInput += num;
+                document.getElementById('user-answer-display').innerText = currentInput;
+            }
+        }
+
+        function clearAnswer() {
+            playSound('click');
+            currentInput = "";
+            document.getElementById('user-answer-display').innerText = "?";
+        }
+
+        function submitAnswer() {
+            if (currentInput === "") return;
+
+            const userVal = parseInt(currentInput, 10);
+            totalQuestions++;
+
+            const feedbackEl = document.getElementById('feedback-message');
+            const questionBox = document.getElementById('question-box');
+
+            if (userVal === correctAnswer) {
+                // Correct Answer!
+                playSound('correct');
+                correctAnswers++;
+                streak++;
+                if (streak > maxStreak) maxStreak = streak;
+
+                // Points calculation with streak multiplier
+                const pointsGained = 10 + (streak > 1 ? (streak - 1) * 5 : 0);
+                score += pointsGained;
+
+                document.getElementById('score-val').innerText = score;
+                document.getElementById('streak-val').innerText = streak;
+
+                // Show praise text
+                const randomPraise = praisePhrases[Math.floor(Math.random() * praisePhrases.length)];
+                feedbackEl.innerText = randomPraise + ` (+${pointsGained} pkt)`;
+                feedbackEl.classList.remove('opacity-0', 'text-red-500');
+                feedbackEl.classList.add('opacity-100', 'text-emerald-600');
+
+                // Quick visual bounce
+                questionBox.classList.add('scale-105');
+                setTimeout(() => questionBox.classList.remove('scale-105'), 200);
+
+            } else {
+                // Wrong Answer!
+                playSound('wrong');
+                streak = 0;
+                document.getElementById('streak-val').innerText = "0";
+
+                feedbackEl.innerText = `Prawidłowy wynik to: ${correctAnswer}`;
+                feedbackEl.classList.remove('opacity-0', 'text-emerald-600');
+                feedbackEl.classList.add('opacity-100', 'text-red-500');
+
+                // Shake animation for feedback
+                questionBox.classList.add('shake');
+                setTimeout(() => questionBox.classList.remove('shake'), 400);
+            }
+
+            // Check End Conditions or Load Next Question
+            setTimeout(() => {
+                feedbackEl.classList.add('opacity-0');
+                if (gameMode === '10q' && currentQuestionIndex >= 10) {
+                    finishGame();
+                } else {
+                    nextQuestion();
+                }
+            }, 1200);
+        }
+
+        // Keyboard listener for physical typing
+        document.addEventListener('keydown', function(e) {
+            const quizScreen = document.getElementById('quiz-screen');
+            if (quizScreen.classList.contains('hidden')) return;
+
+            if (e.key >= '0' && e.key <= '9') {
+                pressKey(e.key);
+            } else if (e.key === 'Backspace') {
+                clearAnswer();
+            } else if (e.key === 'Enter') {
+                submitAnswer();
+            }
+        });
+
+        function finishGame() {
+            if (timerInterval) clearInterval(timerInterval);
+            playSound('fanfare');
+
+            totalTimeSpent = Math.round((Date.now() - startTime) / 1000);
+
+            // Save High Scores
+            saveHighScore(score, maxStreak);
+
+            // Trigger celebration confetti
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+
+            // Populate summary values
+            document.getElementById('final-score').innerText = score;
+            const accuracy = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+            document.getElementById('final-accuracy').innerText = accuracy + "%";
+            document.getElementById('final-streak').innerText = maxStreak;
+            document.getElementById('final-time').innerText = totalTimeSpent + "s";
+
+            // Emoji / Title based on score
+            const trophyEl = document.getElementById('trophy-emoji');
+            const titleEl = document.getElementById('summary-title');
+
+            if (accuracy >= 90) {
+                trophyEl.innerText = "🏆";
+                titleEl.innerText = "Niesamowicie!";
+            } else if (accuracy >= 60) {
+                trophyEl.innerText = "🌟";
+                titleEl.innerText = "Dobra robota!";
+            } else {
+                trophyEl.innerText = "👍";
+                titleEl.innerText = "Trening czyni mistrza!";
+            }
+
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('summary-screen').classList.remove('hidden');
+        }
+
+        function quitGame() {
+            playSound('click');
+            if (timerInterval) clearInterval(timerInterval);
+            showSetupScreen();
+        }
+
+        function showSetupScreen() {
+            updateHighScoreDisplay();
+            document.getElementById('summary-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('setup-screen').classList.remove('hidden');
+        }
+
+        function saveHighScore(newScore, newStreak) {
+            const currentBestScore = parseInt(localStorage.getItem('quiz_best_score') || '0', 10);
+            const currentBestStreak = parseInt(localStorage.getItem('quiz_best_streak') || '0', 10);
+
+            if (newScore > currentBestScore) {
+                localStorage.setItem('quiz_best_score', newScore);
+            }
+            if (newStreak > currentBestStreak) {
+                localStorage.setItem('quiz_best_streak', newStreak);
+            }
+        }
+
+        function updateHighScoreDisplay() {
+            const bestScore = localStorage.getItem('quiz_best_score') || '0';
+            const bestStreak = localStorage.getItem('quiz_best_streak') || '0';
+            document.getElementById('best-score-display').innerText = bestScore;
+            document.getElementById('best-streak-display').innerText = bestStreak;
+        }
+    </script>
+</body>
+</html>
