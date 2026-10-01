@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Szalona Tabliczka Mnożenia 🚀</title>
-    <!-- Tailwind CSS for utility styling -->
+    <title>Szalona Tabliczka Mnożenia 🚀 | Math Quiz Game</title>
+    <!-- Tailwind CSS for modern responsive utilities -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Canvas Confetti library -->
+    <!-- Canvas Confetti library for high score celebrations -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <!-- Google Fonts for fun, kid-friendly typography -->
+    <!-- Google Fonts for multilingual typography (Fredoka for EN/PL, Zen Maru Gothic for Japanese) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -20,8 +20,7 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        fredoka: ['Fredoka', 'sans-serif'],
-                        quicksand: ['Quicksand', 'sans-serif'],
+                        fredoka: ['Fredoka', 'Zen Maru Gothic', 'sans-serif'],
                     },
                     colors: {
                         brandYellow: '#FFD166',
@@ -32,9 +31,9 @@
                         brandDark: '#073B4C'
                     },
                     boxShadow: {
-                        'fun': '0 8px 0px 0px rgba(0, 0, 0, 0.15)',
-                        'fun-lg': '0 12px 0px 0px rgba(0, 0, 0, 0.15)',
-                        'fun-active': '0 2px 0px 0px rgba(0, 0, 0, 0.15)',
+                        'fun': '0 8px 0px 0px rgba(7, 59, 76, 0.2)',
+                        'fun-lg': '0 12px 0px 0px rgba(7, 59, 76, 0.25)',
+                        'fun-active': '0 2px 0px 0px rgba(7, 59, 76, 0.2)',
                     }
                 }
             }
@@ -43,10 +42,11 @@
 
     <style>
         body {
-            font-family: 'Fredoka', sans-serif;
+            font-family: 'Fredoka', 'Zen Maru Gothic', sans-serif;
             background: linear-gradient(135deg, #a8ff78 0%, #78ffd6 100%);
             min-height: 100vh;
             user-select: none;
+            -webkit-user-select: none;
         }
 
         .bounce-in {
@@ -57,7 +57,7 @@
             0% { transform: scale(0.3); opacity: 0; }
             50% { transform: scale(1.05); opacity: 1; }
             70% { transform: scale(0.9); }
-            100% { transform: scale(1); }
+            100% { transform: scale(1); opacity: 1; }
         }
 
         .shake {
@@ -79,135 +79,179 @@
             100% { transform: scale(1.2) rotate(15deg); }
         }
 
-        /* Fun floating background blobs */
         .bg-blob {
             position: absolute;
             border-radius: 50%;
             filter: blur(40px);
-            opacity: 0.4;
+            opacity: 0.35;
             z-index: 0;
             pointer-events: none;
+        }
+
+        .keypad-btn {
+            background-color: #ffffff;
+            color: #073B4C;
+            font-size: 1.75rem;
+            font-weight: 800;
+            padding: 0.75rem 0;
+            border-radius: 1.25rem;
+            border: 3px solid #073B4C;
+            box-shadow: 0 5px 0px 0px #073B4C;
+            transition: all 0.08s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .keypad-btn:active {
+            transform: translateY(5px);
+            box-shadow: 0 0px 0px 0px #073B4C;
+        }
+
+        .lang-btn.active {
+            background-color: #8338EC;
+            color: #ffffff;
+            border-color: #073B4C;
+            transform: scale(1.05);
         }
     </style>
 </head>
 <body class="flex flex-col items-center justify-center p-3 md:p-6 min-h-screen relative overflow-x-hidden">
 
+    <!-- Decorative Background Blobs -->
     <div class="bg-blob w-72 h-72 bg-yellow-300 top-5 left-5"></div>
     <div class="bg-blob w-96 h-96 bg-purple-400 bottom-5 right-5"></div>
     <div class="bg-blob w-80 h-80 bg-pink-400 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
 
-    <div class="w-full max-w-xl z-10">
+    <div class="w-full max-w-xl z-10 my-auto">
 
-        <!-- Header Banner -->
-        <header class="text-center mb-4">
-            <h1 class="text-3xl md:text-5xl font-extrabold text-brandDark drop-shadow-md tracking-wide flex items-center justify-center gap-3">
+        <!-- Top Header & Language Switcher -->
+        <header class="relative mb-4 text-center">
+            <!-- Language Switcher Bar -->
+            <div class="flex justify-center items-center gap-2 mb-3 bg-white/80 backdrop-blur-md p-1.5 rounded-2xl border-2 border-brandDark/30 w-fit mx-auto shadow-sm">
+                <span class="text-xs font-bold text-brandDark/70 ml-2 mr-1">🌐 <span id="lbl-lang">Język</span>:</span>
+                <button onclick="switchLanguage('pl', true)" id="lang-pl" class="lang-btn active px-3 py-1 rounded-xl text-xs md:text-sm font-bold border-2 border-transparent transition-all">
+                    🇵🇱 PL
+                </button>
+                <button onclick="switchLanguage('en', true)" id="lang-en" class="lang-btn px-3 py-1 rounded-xl text-xs md:text-sm font-bold border-2 border-transparent transition-all">
+                    🇬🇧 EN
+                </button>
+                <button onclick="switchLanguage('ja', true)" id="lang-ja" class="lang-btn px-3 py-1 rounded-xl text-xs md:text-sm font-bold border-2 border-transparent transition-all">
+                    🇯🇵 日本語
+                </button>
+            </div>
+
+            <h1 id="app-title" class="text-3xl md:text-5xl font-extrabold text-brandDark drop-shadow-md tracking-wide flex items-center justify-center gap-2">
                 <span>⭐</span> Szalony Quiz Mnożenia 🚀
             </h1>
-            <p class="text-brandDark font-semibold text-base md:text-lg mt-1 opacity-90">
+            <p id="app-subtitle" class="text-brandDark font-semibold text-sm md:text-base mt-1 opacity-90">
                 Zostań Mistrzem Mnożenia! 🧠✨
             </p>
         </header>
 
-        <!-- ================= PAGE 1: MENU / SETUP ================= -->
-        <div id="setup-screen" class="bg-white rounded-3xl p-6 md:p-8 shadow-fun-lg border-4 border-brandDark space-y-6 bounce-in">
+        <!-- ================= SCREEN 1: SETUP & OPTIONS ================= -->
+        <div id="setup-screen" class="bg-white rounded-3xl p-5 md:p-8 shadow-fun-lg border-4 border-brandDark space-y-5 bounce-in">
             
-            <!-- Preset Difficulty Selection -->
+            <!-- Difficulty Presets -->
             <div>
-                <label class="block text-xl font-bold text-brandDark mb-3 text-center">
-                    <i class="fa-solid fa-gauge-high text-brandPink mr-2"></i>Wybierz Poziom Trudności:
+                <label id="lbl-difficulty" class="block text-lg font-bold text-brandDark mb-3 text-center">
+                    <i class="fa-solid fa-gauge-high text-brandPink mr-1"></i>Wybierz Poziom Trudności:
                 </label>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-2.5">
                     <button type="button" onclick="setPreset(1, 1, 'latwy')" id="preset-latwy"
-                        class="preset-btn p-3 rounded-2xl border-4 border-brandDark bg-emerald-100 hover:bg-emerald-200 font-bold text-base md:text-lg text-emerald-900 shadow-fun transition-all active:translate-y-1">
-                        🌱 Łatwy<br><span class="text-xs md:text-sm font-normal text-emerald-700">(1 cyfra × 1 cyfra)</span>
+                        class="preset-btn p-3 rounded-2xl border-4 border-brandDark bg-emerald-100 hover:bg-emerald-200 font-bold text-emerald-900 shadow-fun transition-all active:translate-y-1">
+                        <span id="preset-easy-title" class="block text-base md:text-lg">🌱 Łatwy</span>
+                        <span id="preset-easy-desc" class="text-xs font-normal text-emerald-700">(1 cyfra × 1 cyfra)</span>
                     </button>
                     <button type="button" onclick="setPreset(2, 1, 'sredni')" id="preset-sredni"
-                        class="preset-btn p-3 rounded-2xl border-4 border-brandDark bg-yellow-100 hover:bg-yellow-200 font-bold text-base md:text-lg text-yellow-900 shadow-fun transition-all active:translate-y-1">
-                        ⚡ Średni<br><span class="text-xs md:text-sm font-normal text-yellow-700">(2 cyfry × 1 cyfra)</span>
+                        class="preset-btn p-3 rounded-2xl border-4 border-brandDark bg-yellow-100 hover:bg-yellow-200 font-bold text-yellow-900 shadow-fun transition-all active:translate-y-1">
+                        <span id="preset-medium-title" class="block text-base md:text-lg">⚡ Średni</span>
+                        <span id="preset-medium-desc" class="text-xs font-normal text-yellow-700">(2 cyfry × 1 cyfra)</span>
                     </button>
                     <button type="button" onclick="setPreset(2, 2, 'trudny')" id="preset-trudny"
-                        class="preset-btn p-3 rounded-2xl border-4 border-brandDark bg-orange-100 hover:bg-orange-200 font-bold text-base md:text-lg text-orange-900 shadow-fun transition-all active:translate-y-1">
-                        🔥 Trudny<br><span class="text-xs md:text-sm font-normal text-orange-700">(2 cyfry × 2 cyfry)</span>
+                        class="preset-btn p-3 rounded-2xl border-4 border-brandDark bg-orange-100 hover:bg-orange-200 font-bold text-orange-900 shadow-fun transition-all active:translate-y-1">
+                        <span id="preset-hard-title" class="block text-base md:text-lg">🔥 Trudny</span>
+                        <span id="preset-hard-desc" class="text-xs font-normal text-orange-700">(2 cyfry × 2 cyfry)</span>
                     </button>
                     <button type="button" onclick="setPreset(3, 1, 'mistrz')" id="preset-mistrz"
-                        class="preset-btn p-3 rounded-2xl border-4 border-brandDark bg-purple-100 hover:bg-purple-200 font-bold text-base md:text-lg text-purple-900 shadow-fun transition-all active:translate-y-1">
-                        👑 Mistrz<br><span class="text-xs md:text-sm font-normal text-purple-700">(3 cyfry × 1 cyfra)</span>
+                        class="preset-btn p-3 rounded-2xl border-4 border-brandDark bg-purple-100 hover:bg-purple-200 font-bold text-purple-900 shadow-fun transition-all active:translate-y-1">
+                        <span id="preset-master-title" class="block text-base md:text-lg">👑 Mistrz</span>
+                        <span id="preset-master-desc" class="text-xs font-normal text-purple-700">(3 cyfry × 1 cyfra)</span>
                     </button>
                 </div>
             </div>
 
             <!-- Custom Digit Selectors -->
-            <div class="bg-blue-50 p-4 rounded-2xl border-2 border-brandBlue/30">
-                <p class="text-sm font-bold text-brandBlue mb-2 text-center uppercase tracking-wider">
+            <div class="bg-blue-50 p-3.5 rounded-2xl border-2 border-brandBlue/30">
+                <p id="lbl-custom-digits" class="text-xs font-bold text-brandBlue mb-2 text-center uppercase tracking-wider">
                     <i class="fa-solid fa-sliders mr-1"></i> Lub ustaw własne cyfry:
                 </p>
-                <div class="flex justify-around items-center gap-4 text-center">
+                <div class="flex justify-around items-center gap-2 text-center">
                     <div>
-                        <span class="block text-xs font-bold text-gray-600 mb-1">Pierwsza liczba:</span>
+                        <span id="lbl-num1" class="block text-xs font-bold text-gray-600 mb-1">Pierwsza liczba:</span>
                         <div class="flex items-center justify-center gap-1">
-                            <button onclick="changeDigits('digits1', -1)" class="w-9 h-9 rounded-xl bg-brandBlue text-white font-bold text-xl shadow-md active:scale-95">-</button>
-                            <span id="digits1-val" class="w-10 text-xl font-black text-brandDark">1</span>
-                            <button onclick="changeDigits('digits1', 1)" class="w-9 h-9 rounded-xl bg-brandBlue text-white font-bold text-xl shadow-md active:scale-95">+</button>
+                            <button onclick="changeDigits('digits1', -1)" class="w-8 h-8 rounded-xl bg-brandBlue text-white font-bold text-lg shadow active:scale-95">-</button>
+                            <span id="digits1-val" class="w-8 text-xl font-black text-brandDark">1</span>
+                            <button onclick="changeDigits('digits1', 1)" class="w-8 h-8 rounded-xl bg-brandBlue text-white font-bold text-lg shadow active:scale-95">+</button>
                         </div>
-                        <span class="text-xs text-gray-500 font-medium">cyfr(y)</span>
+                        <span id="lbl-digits-unit-1" class="text-[11px] text-gray-500 font-medium">cyfr(y)</span>
                     </div>
                     <div class="text-2xl font-black text-brandPink">×</div>
                     <div>
-                        <span class="block text-xs font-bold text-gray-600 mb-1">Druga liczba:</span>
+                        <span id="lbl-num2" class="block text-xs font-bold text-gray-600 mb-1">Druga liczba:</span>
                         <div class="flex items-center justify-center gap-1">
-                            <button onclick="changeDigits('digits2', -1)" class="w-9 h-9 rounded-xl bg-brandBlue text-white font-bold text-xl shadow-md active:scale-95">-</button>
-                            <span id="digits2-val" class="w-10 text-xl font-black text-brandDark">1</span>
-                            <button onclick="changeDigits('digits2', 1)" class="w-9 h-9 rounded-xl bg-brandBlue text-white font-bold text-xl shadow-md active:scale-95">+</button>
+                            <button onclick="changeDigits('digits2', -1)" class="w-8 h-8 rounded-xl bg-brandBlue text-white font-bold text-lg shadow active:scale-95">-</button>
+                            <span id="digits2-val" class="w-8 text-xl font-black text-brandDark">1</span>
+                            <button onclick="changeDigits('digits2', 1)" class="w-8 h-8 rounded-xl bg-brandBlue text-white font-bold text-lg shadow active:scale-95">+</button>
                         </div>
-                        <span class="text-xs text-gray-500 font-medium">cyfr(y)</span>
+                        <span id="lbl-digits-unit-2" class="text-[11px] text-gray-500 font-medium">cyfr(y)</span>
                     </div>
                 </div>
             </div>
 
             <!-- Game Mode Selection -->
             <div>
-                <label class="block text-lg font-bold text-brandDark mb-2 text-center">
-                    <i class="fa-solid fa-gamepad text-brandPurple mr-2"></i>Tryb Gry:
+                <label id="lbl-gamemode" class="block text-lg font-bold text-brandDark mb-2 text-center">
+                    <i class="fa-solid fa-gamepad text-brandPurple mr-1"></i>Tryb Gry:
                 </label>
                 <div class="grid grid-cols-3 gap-2">
                     <button type="button" onclick="setGameMode('10q')" id="mode-10q"
-                        class="mode-btn p-3 rounded-2xl border-4 border-brandDark bg-pink-100 text-brandDark font-bold text-center text-sm md:text-base shadow-fun transition-all">
-                        🎯 10 Pytań
+                        class="mode-btn p-3 rounded-2xl border-4 border-brandDark bg-pink-100 text-brandDark font-bold text-center text-xs md:text-sm shadow-fun transition-all">
+                        🎯 <span id="mode-10q-text">10 Pytań</span>
                     </button>
                     <button type="button" onclick="setGameMode('time')" id="mode-time"
-                        class="mode-btn p-3 rounded-2xl border-4 border-brandDark bg-gray-100 text-brandDark font-bold text-center text-sm md:text-base shadow-fun transition-all">
-                        ⏱️ Na Czas (60s)
+                        class="mode-btn p-3 rounded-2xl border-4 border-brandDark bg-gray-100 text-brandDark font-bold text-center text-xs md:text-sm shadow-fun transition-all">
+                        ⏱️ <span id="mode-time-text">Na Czas (60s)</span>
                     </button>
                     <button type="button" onclick="setGameMode('endless')" id="mode-endless"
-                        class="mode-btn p-3 rounded-2xl border-4 border-brandDark bg-gray-100 text-brandDark font-bold text-center text-sm md:text-base shadow-fun transition-all">
-                        ♾️ Bez Końca
+                        class="mode-btn p-3 rounded-2xl border-4 border-brandDark bg-gray-100 text-brandDark font-bold text-center text-xs md:text-sm shadow-fun transition-all">
+                        ♾️ <span id="mode-endless-text">Bez Końca</span>
                     </button>
                 </div>
             </div>
 
             <!-- High Scores Bar -->
             <div class="flex justify-between items-center text-xs md:text-sm font-bold bg-amber-50 p-3 rounded-xl border border-amber-200 text-amber-900">
-                <span>🏆 Najlepszy wynik: <span id="best-score-display" class="text-base font-black text-brandPink">0</span> pkt</span>
-                <span>🔥 Rekord serii: <span id="best-streak-display" class="text-base font-black text-orange-500">0</span></span>
+                <span>🏆 <span id="lbl-best-score">Najlepszy wynik</span>: <span id="best-score-display" class="text-base font-black text-brandPink">0</span></span>
+                <span>🔥 <span id="lbl-best-streak">Rekord serii</span>: <span id="best-streak-display" class="text-base font-black text-orange-500">0</span></span>
             </div>
 
             <!-- Start Game Button -->
             <button onclick="startGame()" 
                 class="w-full py-4 bg-brandGreen hover:bg-emerald-400 text-brandDark font-black text-2xl rounded-2xl border-4 border-brandDark shadow-fun active:shadow-fun-active active:translate-y-2 transition-all flex items-center justify-center gap-3">
-                <i class="fa-solid fa-play"></i> ZACZYNAJMY!
+                <i class="fa-solid fa-play"></i> <span id="btn-start">ZACZYNAJMY!</span>
             </button>
 
         </div>
 
-        <!-- ================= PAGE 2: QUIZ INTERFACE ================= -->
-        <div id="quiz-screen" class="bg-white rounded-3xl p-5 md:p-7 shadow-fun-lg border-4 border-brandDark space-y-4 hidden relative">
+        <!-- ================= SCREEN 2: ACTIVE QUIZ ================= -->
+        <div id="quiz-screen" class="bg-white rounded-3xl p-4 md:p-7 shadow-fun-lg border-4 border-brandDark space-y-4 hidden relative">
             
-            <!-- Top Bar: Scores & Stats -->
+            <!-- Top Stats Bar -->
             <div class="flex justify-between items-center text-sm md:text-base font-extrabold bg-blue-50 p-3 rounded-2xl border-2 border-brandBlue/20">
                 <div class="flex items-center gap-2">
                     <span class="text-xl">⭐</span>
                     <div>
-                        <span class="text-xs text-gray-500 block -mb-1">Punkty</span>
+                        <span id="lbl-score" class="text-xs text-gray-500 block -mb-1">Punkty</span>
                         <span id="score-val" class="text-brandBlue text-xl font-black">0</span>
                     </div>
                 </div>
@@ -215,7 +259,7 @@
                 <div class="flex items-center gap-2">
                     <span class="text-xl pulse-star">🔥</span>
                     <div>
-                        <span class="text-xs text-gray-500 block -mb-1">Seria</span>
+                        <span id="lbl-streak" class="text-xs text-gray-500 block -mb-1">Seria</span>
                         <span id="streak-val" class="text-orange-500 text-xl font-black">0</span>
                     </div>
                 </div>
@@ -226,24 +270,24 @@
                 </div>
             </div>
 
-            <!-- Math Question Display -->
-            <div id="question-box" class="bg-amber-100 rounded-2xl p-6 text-center border-4 border-brandDark shadow-inner relative overflow-hidden">
-                <div class="text-4xl md:text-6xl font-black text-brandDark tracking-wider flex items-center justify-center gap-3 my-2">
+            <!-- Question Math Display -->
+            <div id="question-box" class="bg-amber-100 rounded-2xl p-5 md:p-6 text-center border-4 border-brandDark shadow-inner relative overflow-hidden transition-transform">
+                <div class="text-4xl md:text-6xl font-black text-brandDark tracking-wider flex items-center justify-center gap-2 md:gap-3 my-1">
                     <span id="factor1">7</span>
                     <span class="text-brandPink">×</span>
                     <span id="factor2">8</span>
                     <span class="text-brandBlue">=</span>
-                    <span id="user-answer-display" class="min-w-[2ch] bg-white px-3 py-1 rounded-xl border-4 border-dashed border-brandDark text-brandPurple inline-block min-h-[1.3em]">
+                    <span id="user-answer-display" class="min-w-[2.2ch] bg-white px-3 py-1 rounded-xl border-4 border-dashed border-brandDark text-brandPurple inline-block min-h-[1.25em]">
                         ?
                     </span>
                 </div>
-                <!-- Dynamic feedback banner -->
-                <div id="feedback-message" class="h-6 text-base font-bold text-brandPink mt-1 opacity-0 transition-opacity">
+                <!-- Dynamic feedback text -->
+                <div id="feedback-message" class="h-6 text-sm md:text-base font-bold mt-1 opacity-0 transition-opacity">
                     Świetnie!
                 </div>
             </div>
 
-            <!-- Virtual On-Screen Keypad -->
+            <!-- On-Screen Keypad -->
             <div class="grid grid-cols-3 gap-2 md:gap-3 max-w-xs mx-auto">
                 <button onclick="pressKey('1')" class="keypad-btn">1</button>
                 <button onclick="pressKey('2')" class="keypad-btn">2</button>
@@ -263,79 +307,295 @@
                 </button>
             </div>
 
-            <!-- Quiz Controls -->
-            <div class="flex justify-between items-center pt-2">
+            <!-- Quiz Footer Controls -->
+            <div class="flex justify-between items-center pt-1">
                 <button onclick="quitGame()" class="text-xs md:text-sm font-bold text-gray-500 hover:text-red-500 transition-colors">
-                    <i class="fa-solid fa-arrow-left mr-1"></i> Wyjdź do menu
+                    <i class="fa-solid fa-arrow-left mr-1"></i> <span id="btn-quit">Wyjdź do menu</span>
                 </button>
-                <span class="text-xs text-gray-400 font-medium">Użyj klawiatury lub przycisków</span>
+                <span id="lbl-keyboard-hint" class="text-[11px] text-gray-400 font-medium">Użyj klawiatury lub ekranu</span>
             </div>
 
         </div>
 
-        <!-- ================= PAGE 3: RESULTS SUMMARY ================= -->
-        <div id="summary-screen" class="bg-white rounded-3xl p-6 md:p-8 shadow-fun-lg border-4 border-brandDark text-center space-y-6 hidden bounce-in">
-            <div class="text-6xl my-2" id="trophy-emoji">🏆</div>
+        <!-- ================= SCREEN 3: RESULTS SUMMARY ================= -->
+        <div id="summary-screen" class="bg-white rounded-3xl p-6 md:p-8 shadow-fun-lg border-4 border-brandDark text-center space-y-5 hidden bounce-in">
+            <div class="text-6xl my-1" id="trophy-emoji">🏆</div>
+            <div id="stars-display" class="flex justify-center text-3xl gap-2 text-amber-400">
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+            </div>
+            
             <h2 id="summary-title" class="text-3xl md:text-4xl font-extrabold text-brandDark">
                 Niesamowicie!
             </h2>
-            <p id="summary-subtitle" class="text-gray-600 font-semibold">
+            <p id="summary-subtitle" class="text-gray-600 font-semibold text-sm md:text-base">
                 Oto Twój wspaniały wynik!
             </p>
 
-            <div class="grid grid-cols-2 gap-4 bg-purple-50 p-4 rounded-2xl border-2 border-brandPurple/30">
-                <div class="p-3 bg-white rounded-xl shadow-sm border border-purple-100">
-                    <span class="block text-xs font-bold text-gray-500 uppercase">Wynik Ogólny</span>
-                    <span id="final-score" class="text-3xl font-black text-brandBlue">0</span>
-                    <span class="text-xs text-gray-400">pkt</span>
+            <div class="grid grid-cols-2 gap-3 bg-purple-50 p-4 rounded-2xl border-2 border-brandPurple/30">
+                <div class="p-2.5 bg-white rounded-xl shadow-sm border border-purple-100">
+                    <span id="lbl-res-score" class="block text-xs font-bold text-gray-500 uppercase">Wynik Ogólny</span>
+                    <span id="final-score" class="text-2xl md:text-3xl font-black text-brandBlue">0</span>
                 </div>
-                <div class="p-3 bg-white rounded-xl shadow-sm border border-purple-100">
-                    <span class="block text-xs font-bold text-gray-500 uppercase">Celność</span>
-                    <span id="final-accuracy" class="text-3xl font-black text-brandGreen">100%</span>
+                <div class="p-2.5 bg-white rounded-xl shadow-sm border border-purple-100">
+                    <span id="lbl-res-accuracy" class="block text-xs font-bold text-gray-500 uppercase">Celność</span>
+                    <span id="final-accuracy" class="text-2xl md:text-3xl font-black text-brandGreen">100%</span>
                 </div>
-                <div class="p-3 bg-white rounded-xl shadow-sm border border-purple-100">
-                    <span class="block text-xs font-bold text-gray-500 uppercase">Najdłuższa Seria</span>
-                    <span id="final-streak" class="text-3xl font-black text-orange-500">0</span>
-                    <span class="text-xs text-gray-400">z rzędu</span>
+                <div class="p-2.5 bg-white rounded-xl shadow-sm border border-purple-100">
+                    <span id="lbl-res-streak" class="block text-xs font-bold text-gray-500 uppercase">Najdłuższa Seria</span>
+                    <span id="final-streak" class="text-2xl md:text-3xl font-black text-orange-500">0</span>
                 </div>
-                <div class="p-3 bg-white rounded-xl shadow-sm border border-purple-100">
-                    <span class="block text-xs font-bold text-gray-500 uppercase">Czas Gry</span>
-                    <span id="final-time" class="text-3xl font-black text-brandPink">0s</span>
+                <div class="p-2.5 bg-white rounded-xl shadow-sm border border-purple-100">
+                    <span id="lbl-res-time" class="block text-xs font-bold text-gray-500 uppercase">Czas Gry</span>
+                    <span id="final-time" class="text-2xl md:text-3xl font-black text-brandPink">0s</span>
                 </div>
             </div>
 
             <button onclick="showSetupScreen()" 
                 class="w-full py-4 bg-brandYellow hover:bg-yellow-300 text-brandDark font-black text-xl rounded-2xl border-4 border-brandDark shadow-fun active:shadow-fun-active active:translate-y-2 transition-all">
-                <i class="fa-solid fa-rotate-right mr-2"></i> ZAGRAJ JESZCZE RAZ
+                <i class="fa-solid fa-rotate-right mr-2"></i> <span id="btn-replay">ZAGRAJ JESZCZE RAZ</span>
             </button>
         </div>
 
     </div>
 
-    <!-- Custom CSS styling for Keypad buttons -->
-    <style>
-        .keypad-btn {
-            background-color: #f8fafc;
-            color: #073B4C;
-            font-size: 1.75rem;
-            font-weight: 800;
-            padding: 0.75rem 0;
-            border-radius: 1rem;
-            border: 3px solid #073B4C;
-            box-shadow: 0 4px 0px 0px rgba(7, 59, 76, 1);
-            transition: all 0.05s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+    <script>
+        // Multilingual Dictionary (PL, EN, JA)
+        const translations = {
+            pl: {
+                langName: "Język",
+                appTitle: "⭐ Szalony Quiz Mnożenia 🚀",
+                appSubtitle: "Zostań Mistrzem Mnożenia! 🧠✨",
+                difficulty: "Wybierz Poziom Trudności:",
+                easyTitle: "🌱 Łatwy",
+                easyDesc: "(1 cyfra × 1 cyfra)",
+                mediumTitle: "⚡ Średni",
+                mediumDesc: "(2 cyfry × 1 cyfra)",
+                hardTitle: "🔥 Trudny",
+                hardDesc: "(2 cyfry × 2 cyfry)",
+                masterTitle: "👑 Mistrz",
+                masterDesc: "(3 cyfry × 1 cyfra)",
+                customDigits: "Lub ustaw własne cyfry:",
+                num1: "Pierwsza liczba:",
+                num2: "Druga liczba:",
+                digitsUnit: "cyfr(y)",
+                gamemode: "Tryb Gry:",
+                mode10q: "10 Pytań",
+                modeTime: "Na Czas (60s)",
+                modeEndless: "Bez Końca",
+                bestScore: "Najlepszy wynik",
+                bestStreak: "Rekord serii",
+                btnStart: "ZACZYNAJMY!",
+                lblScore: "Punkty",
+                lblStreak: "Seria",
+                lblTrackerQ: "Pytanie",
+                lblTrackerTime: "Czas",
+                lblTrackerMode: "Tryb",
+                btnQuit: "Wyjdź do menu",
+                keyboardHint: "Użyj klawiatury lub ekranu",
+                resScore: "Wynik Ogólny",
+                resAccuracy: "Celność",
+                resStreak: "Najdłuższa Seria",
+                resTime: "Czas Gry",
+                btnReplay: "ZAGRAJ JESZCZE RAZ",
+                praising: ["Świetnie! 🌟", "Super! 🚀", "Brawo! 🎉", "Genialnie! 🧠", "Mistrz! 👑", "Ekstra! ⚡"],
+                wrongFeedback: "Prawidłowy wynik to: ",
+                sumAmazing: "Niesamowicie!",
+                sumGood: "Dobra robota!",
+                sumPractice: "Trening czyni mistrza!",
+                sumSub: "Oto Twój wspaniały wynik!"
+            },
+            en: {
+                langName: "Language",
+                appTitle: "⭐ Crazy Math Quiz 🚀",
+                appSubtitle: "Become a Multiplication Master! 🧠✨",
+                difficulty: "Select Difficulty Level:",
+                easyTitle: "🌱 Easy",
+                easyDesc: "(1 digit × 1 digit)",
+                mediumTitle: "⚡ Medium",
+                mediumDesc: "(2 digits × 1 digit)",
+                hardTitle: "🔥 Hard",
+                hardDesc: "(2 digits × 2 digits)",
+                masterTitle: "👑 Master",
+                masterDesc: "(3 digits × 1 digit)",
+                customDigits: "Or customize digit lengths:",
+                num1: "First number:",
+                num2: "Second number:",
+                digitsUnit: "digit(s)",
+                gamemode: "Game Mode:",
+                mode10q: "10 Questions",
+                modeTime: "Time Attack (60s)",
+                modeEndless: "Endless",
+                bestScore: "High Score",
+                bestStreak: "Best Streak",
+                btnStart: "LET'S PLAY!",
+                lblScore: "Score",
+                lblStreak: "Streak",
+                lblTrackerQ: "Question",
+                lblTrackerTime: "Time",
+                lblTrackerMode: "Mode",
+                btnQuit: "Back to Menu",
+                keyboardHint: "Use keypad or keyboard",
+                resScore: "Total Score",
+                resAccuracy: "Accuracy",
+                resStreak: "Best Streak",
+                resTime: "Play Time",
+                btnReplay: "PLAY AGAIN",
+                praising: ["Awesome! 🌟", "Superb! 🚀", "Great job! 🎉", "Brilliant! 🧠", "Master! 👑", "Amazing! ⚡"],
+                wrongFeedback: "Correct answer was: ",
+                sumAmazing: "Amazing Job!",
+                sumGood: "Well Done!",
+                sumPractice: "Practice Makes Perfect!",
+                sumSub: "Here is your final score card!"
+            },
+            ja: {
+                langName: "言語",
+                appTitle: "⭐ わくわく掛け算クイズ 🚀",
+                appSubtitle: "掛け算のマスターになろう！ 🧠✨",
+                difficulty: "難易度をえらんでね:",
+                easyTitle: "🌱 かんたん",
+                easyDesc: "(1けた × 1けた)",
+                mediumTitle: "⚡ ふつう",
+                mediumDesc: "(2けた × 1けた)",
+                hardTitle: "🔥 むずかしい",
+                hardDesc: "(2けた × 2けた)",
+                masterTitle: "👑 達人",
+                masterDesc: "(3けた × 1けた)",
+                customDigits: "または桁数をじぶんで設定:",
+                num1: "1つめの数:",
+                num2: "2つめの数:",
+                digitsUnit: "けた",
+                gamemode: "ゲームモード:",
+                mode10q: "10問問",
+                modeTime: "タイムアタック (60秒)",
+                modeEndless: "エンドレス",
+                bestScore: "ハイスコア",
+                bestStreak: "れんぞく記録",
+                btnStart: "スタート！",
+                lblScore: "スコア",
+                lblStreak: "コンボ",
+                lblTrackerQ: "問題",
+                lblTrackerTime: "時間",
+                lblTrackerMode: "モード",
+                btnQuit: "メニューにもどる",
+                keyboardHint: "画面ボタンまたはキーボードで入力",
+                resScore: "合計スコア",
+                resAccuracy: "正解率",
+                resStreak: "最高コンボ",
+                resTime: "プレイ時間",
+                btnReplay: "もういちどあそぶ",
+                praising: ["すごい！ 🌟", "さすが！ 🚀", "大正解！ 🎉", "天才！ 🧠", "パーフェクト！ 👑", "すばらしい！ ⚡"],
+                wrongFeedback: "せいかいは: ",
+                sumAmazing: "すばらしい！",
+                sumGood: "よくがんばったね！",
+                sumPractice: "つぎもがんばろう！",
+                sumSub: "今回のけっかはこちら！"
+            }
+        };
+
+        let currentLang = 'en';
+
+        /**
+         * Detects the initial language based on LocalStorage or Browser configuration
+         */
+        function detectInitialLanguage() {
+            // 1. Check if user previously saved language preference
+            const savedLang = localStorage.getItem('quiz_user_language');
+            if (savedLang && translations[savedLang]) {
+                return savedLang;
+            }
+
+            // 2. Otherwise check browser languages
+            const browserLangs = navigator.languages || [navigator.language || 'en'];
+            for (let langStr of browserLangs) {
+                if (!langStr) continue;
+                const code = langStr.toLowerCase().slice(0, 2);
+                if (code === 'pl') return 'pl';
+                if (code === 'ja') return 'ja';
+                if (code === 'en') return 'en';
+            }
+
+            // 3. Fallback to English for any other language
+            return 'en';
         }
-        .keypad-btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 0px 0px 0px rgba(7, 59, 76, 1);
+
+        function switchLanguage(lang, isManual = false) {
+            if (isManual) {
+                playSound('click');
+                // Store manual preference
+                localStorage.setItem('quiz_user_language', lang);
+            }
+
+            currentLang = lang;
+
+            // Highlight active language button
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.getElementById(`lang-${lang}`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            const t = translations[lang] || translations.en;
+
+            // Update text elements
+            document.getElementById('lbl-lang').innerText = t.langName;
+            document.getElementById('app-title').innerHTML = t.appTitle;
+            document.getElementById('app-subtitle').innerText = t.appSubtitle;
+            document.getElementById('lbl-difficulty').innerHTML = `<i class="fa-solid fa-gauge-high text-brandPink mr-1"></i>` + t.difficulty;
+            
+            document.getElementById('preset-easy-title').innerText = t.easyTitle;
+            document.getElementById('preset-easy-desc').innerText = t.easyDesc;
+            document.getElementById('preset-medium-title').innerText = t.mediumTitle;
+            document.getElementById('preset-medium-desc').innerText = t.mediumDesc;
+            document.getElementById('preset-hard-title').innerText = t.hardTitle;
+            document.getElementById('preset-hard-desc').innerText = t.hardDesc;
+            document.getElementById('preset-master-title').innerText = t.masterTitle;
+            document.getElementById('preset-master-desc').innerText = t.masterDesc;
+
+            document.getElementById('lbl-custom-digits').innerHTML = `<i class="fa-solid fa-sliders mr-1"></i>` + t.customDigits;
+            document.getElementById('lbl-num1').innerText = t.num1;
+            document.getElementById('lbl-num2').innerText = t.num2;
+            document.getElementById('lbl-digits-unit-1').innerText = t.digitsUnit;
+            document.getElementById('lbl-digits-unit-2').innerText = t.digitsUnit;
+
+            document.getElementById('lbl-gamemode').innerHTML = `<i class="fa-solid fa-gamepad text-brandPurple mr-1"></i>` + t.gamemode;
+            document.getElementById('mode-10q-text').innerText = t.mode10q;
+            document.getElementById('mode-time-text').innerText = t.modeTime;
+            document.getElementById('mode-endless-text').innerText = t.modeEndless;
+
+            document.getElementById('lbl-best-score').innerText = t.bestScore;
+            document.getElementById('lbl-best-streak').innerText = t.bestStreak;
+            document.getElementById('btn-start').innerText = t.btnStart;
+
+            document.getElementById('lbl-score').innerText = t.lblScore;
+            document.getElementById('lbl-streak').innerText = t.lblStreak;
+            document.getElementById('btn-quit').innerText = t.btnQuit;
+            document.getElementById('lbl-keyboard-hint').innerText = t.keyboardHint;
+
+            document.getElementById('lbl-res-score').innerText = t.resScore;
+            document.getElementById('lbl-res-accuracy').innerText = t.resAccuracy;
+            document.getElementById('lbl-res-streak').innerText = t.resStreak;
+            document.getElementById('lbl-res-time').innerText = t.resTime;
+            document.getElementById('btn-replay').innerText = t.btnReplay;
+
+            // Update tracker label dynamically if in quiz
+            updateTrackerLabel();
         }
-    </style>
+
+        function updateTrackerLabel() {
+            const t = translations[currentLang] || translations.en;
+            const trackerLabel = document.getElementById('tracker-label');
+            if (gameMode === '10q') {
+                trackerLabel.innerText = t.lblTrackerQ;
+            } else if (gameMode === 'time') {
+                trackerLabel.innerText = t.lblTrackerTime;
+            } else {
+                trackerLabel.innerText = t.lblTrackerMode;
+            }
+        }
+    </script>
 
     <script>
-        // Web Audio API Synthesizer for lag-free, custom sound effects
+        // Web Audio API Sound Synthesizer
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         let audioCtx = null;
 
@@ -348,7 +608,6 @@
             }
         }
 
-        // Sound effect generator functions
         function playSound(type) {
             try {
                 initAudio();
@@ -363,26 +622,26 @@
 
                 if (type === 'click') {
                     osc.type = 'sine';
-                    osc.frequency.setValueAtTime(400, now);
-                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
-                    gain.gain.setValueAtTime(0.15, now);
-                    gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+                    osc.frequency.setValueAtTime(450, now);
+                    osc.frequency.exponentialRampToValueAtTime(850, now + 0.04);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.04);
                     osc.start(now);
-                    osc.stop(now + 0.05);
+                    osc.stop(now + 0.04);
                 } else if (type === 'correct') {
                     osc.type = 'triangle';
                     osc.frequency.setValueAtTime(523.25, now); // C5
                     osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
                     osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
-                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.setValueAtTime(0.18, now);
                     gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
                     osc.start(now);
                     osc.stop(now + 0.3);
                 } else if (type === 'wrong') {
                     osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(220, now); // A3
+                    osc.frequency.setValueAtTime(220, now);
                     osc.frequency.setValueAtTime(180, now + 0.1);
-                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.setValueAtTime(0.18, now);
                     gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
                     osc.start(now);
                     osc.stop(now + 0.25);
@@ -395,20 +654,21 @@
                         noteGain.connect(audioCtx.destination);
                         
                         noteOsc.type = 'triangle';
-                        noteOsc.frequency.setValueAtTime(freq, now + idx * 0.1);
-                        noteGain.gain.setValueAtTime(0.2, now + idx * 0.1);
-                        noteGain.gain.linearRampToValueAtTime(0.01, now + idx * 0.1 + 0.25);
+                        noteOsc.frequency.setValueAtTime(freq, now + idx * 0.09);
+                        noteGain.gain.setValueAtTime(0.18, now + idx * 0.09);
+                        noteGain.gain.linearRampToValueAtTime(0.01, now + idx * 0.09 + 0.22);
                         
-                        noteOsc.start(now + idx * 0.1);
-                        noteOsc.stop(now + idx * 0.1 + 0.25);
+                        noteOsc.start(now + idx * 0.09);
+                        noteOsc.stop(now + idx * 0.09 + 0.22);
                     });
                 }
             } catch (e) {
                 console.log('Audio playback prevented or unsupported');
             }
         }
+    </script>
 
-        // ================= GAME LOGIC & STATE =================
+    <script>
         let digits1 = 1;
         let digits2 = 1;
         let gameMode = '10q'; // '10q', 'time', 'endless'
@@ -430,14 +690,14 @@
         let startTime = 0;
         let totalTimeSpent = 0;
 
-        // Feedback praise words
-        const praisePhrases = ["Świetnie! 🌟", "Super! 🚀", "Brawo! 🎉", "Genialnie! 🧠", "Mistrz! 👑", "Ekstra! ⚡"];
-
-        // Initialize High Scores from LocalStorage
         window.onload = function() {
             updateHighScoreDisplay();
             setPreset(1, 1, 'latwy');
             setGameMode('10q');
+
+            // Detect and apply language automatically
+            const detectedLang = detectInitialLanguage();
+            switchLanguage(detectedLang, false);
         };
 
         function changeDigits(target, delta) {
@@ -449,7 +709,6 @@
                 digits2 = Math.max(1, Math.min(3, digits2 + delta));
                 document.getElementById('digits2-val').innerText = digits2;
             }
-            // Clear preset highlight when custom changed
             document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('ring-4', 'ring-brandPink'));
         }
 
@@ -498,16 +757,15 @@
             document.getElementById('summary-screen').classList.add('hidden');
             document.getElementById('quiz-screen').classList.remove('hidden');
 
+            updateTrackerLabel();
+
             if (gameMode === 'time') {
                 timeRemaining = 60;
-                document.getElementById('tracker-label').innerText = "Czas";
                 document.getElementById('tracker-val').innerText = "60s";
                 timerInterval = setInterval(updateTimer, 1000);
             } else if (gameMode === '10q') {
-                document.getElementById('tracker-label').innerText = "Pytanie";
                 document.getElementById('tracker-val').innerText = "1/10";
             } else {
-                document.getElementById('tracker-label').innerText = "Tryb";
                 document.getElementById('tracker-val').innerText = "♾️";
             }
 
@@ -525,11 +783,11 @@
 
         function generateNumber(digits) {
             if (digits === 1) {
-                return Math.floor(Math.random() * 9) + 1; // 1 to 9
+                return Math.floor(Math.random() * 9) + 1; // 1 - 9
             } else if (digits === 2) {
-                return Math.floor(Math.random() * 90) + 10; // 10 to 99
+                return Math.floor(Math.random() * 90) + 10; // 10 - 99
             } else if (digits === 3) {
-                return Math.floor(Math.random() * 900) + 100; // 100 to 999
+                return Math.floor(Math.random() * 900) + 100; // 100 - 999
             }
             return 1;
         }
@@ -553,7 +811,6 @@
             }
         }
 
-        // On-screen Keypad handling
         function pressKey(num) {
             playSound('click');
             if (currentInput.length < 7) {
@@ -576,47 +833,41 @@
 
             const feedbackEl = document.getElementById('feedback-message');
             const questionBox = document.getElementById('question-box');
+            const t = translations[currentLang] || translations.en;
 
             if (userVal === correctAnswer) {
-                // Correct Answer!
                 playSound('correct');
                 correctAnswers++;
                 streak++;
                 if (streak > maxStreak) maxStreak = streak;
 
-                // Points calculation with streak multiplier
                 const pointsGained = 10 + (streak > 1 ? (streak - 1) * 5 : 0);
                 score += pointsGained;
 
                 document.getElementById('score-val').innerText = score;
                 document.getElementById('streak-val').innerText = streak;
 
-                // Show praise text
-                const randomPraise = praisePhrases[Math.floor(Math.random() * praisePhrases.length)];
-                feedbackEl.innerText = randomPraise + ` (+${pointsGained} pkt)`;
+                const randomPraise = t.praising[Math.floor(Math.random() * t.praising.length)];
+                feedbackEl.innerText = `${randomPraise} (+${pointsGained} pts)`;
                 feedbackEl.classList.remove('opacity-0', 'text-red-500');
                 feedbackEl.classList.add('opacity-100', 'text-emerald-600');
 
-                // Quick visual bounce
                 questionBox.classList.add('scale-105');
                 setTimeout(() => questionBox.classList.remove('scale-105'), 200);
 
             } else {
-                // Wrong Answer!
                 playSound('wrong');
                 streak = 0;
                 document.getElementById('streak-val').innerText = "0";
 
-                feedbackEl.innerText = `Prawidłowy wynik to: ${correctAnswer}`;
+                feedbackEl.innerText = `${t.wrongFeedback}${correctAnswer}`;
                 feedbackEl.classList.remove('opacity-0', 'text-emerald-600');
                 feedbackEl.classList.add('opacity-100', 'text-red-500');
 
-                // Shake animation for feedback
                 questionBox.classList.add('shake');
                 setTimeout(() => questionBox.classList.remove('shake'), 400);
             }
 
-            // Check End Conditions or Load Next Question
             setTimeout(() => {
                 feedbackEl.classList.add('opacity-0');
                 if (gameMode === '10q' && currentQuestionIndex >= 10) {
@@ -627,7 +878,7 @@
             }, 1200);
         }
 
-        // Keyboard listener for physical typing
+        // Listen for Physical Keyboard Inputs
         document.addEventListener('keydown', function(e) {
             const quizScreen = document.getElementById('quiz-screen');
             if (quizScreen.classList.contains('hidden')) return;
@@ -646,38 +897,41 @@
             playSound('fanfare');
 
             totalTimeSpent = Math.round((Date.now() - startTime) / 1000);
-
-            // Save High Scores
             saveHighScore(score, maxStreak);
 
-            // Trigger celebration confetti
+            // Celebration confetti
             confetti({
-                particleCount: 100,
-                spread: 70,
+                particleCount: 110,
+                spread: 80,
                 origin: { y: 0.6 }
             });
 
-            // Populate summary values
             document.getElementById('final-score').innerText = score;
             const accuracy = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
             document.getElementById('final-accuracy').innerText = accuracy + "%";
             document.getElementById('final-streak').innerText = maxStreak;
             document.getElementById('final-time').innerText = totalTimeSpent + "s";
 
-            // Emoji / Title based on score
+            const t = translations[currentLang] || translations.en;
             const trophyEl = document.getElementById('trophy-emoji');
             const titleEl = document.getElementById('summary-title');
+            const starsContainer = document.getElementById('stars-display');
 
+            let starsHTML = '';
             if (accuracy >= 90) {
                 trophyEl.innerText = "🏆";
-                titleEl.innerText = "Niesamowicie!";
+                titleEl.innerText = t.sumAmazing;
+                starsHTML = '<i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>';
             } else if (accuracy >= 60) {
                 trophyEl.innerText = "🌟";
-                titleEl.innerText = "Dobra robota!";
+                titleEl.innerText = t.sumGood;
+                starsHTML = '<i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star text-amber-200"></i>';
             } else {
                 trophyEl.innerText = "👍";
-                titleEl.innerText = "Trening czyni mistrza!";
+                titleEl.innerText = t.sumPractice;
+                starsHTML = '<i class="fa-solid fa-star"></i><i class="fa-regular fa-star text-amber-200"></i><i class="fa-regular fa-star text-amber-200"></i>';
             }
+            starsContainer.innerHTML = starsHTML;
 
             document.getElementById('quiz-screen').classList.add('hidden');
             document.getElementById('summary-screen').classList.remove('hidden');
